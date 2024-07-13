@@ -1,0 +1,15 @@
+{
+  "name": "polls",
+  "version": "1.0.0",
+  "description": "A decentralized poll creator and manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shubham Prasad",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.6"
+  }
+}
