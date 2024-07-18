@@ -35,6 +35,7 @@ export declare namespace PollManager {
     question: string;
     options: PollManager.OptionStruct[];
     isActive: boolean;
+    numParticipants: BigNumberish;
   };
 
   export type PollStructOutput = [
@@ -42,13 +43,15 @@ export declare namespace PollManager {
     creator: string,
     question: string,
     options: PollManager.OptionStructOutput[],
-    isActive: boolean
+    isActive: boolean,
+    numParticipants: bigint
   ] & {
     id: bigint;
     creator: string;
     question: string;
     options: PollManager.OptionStructOutput[];
     isActive: boolean;
+    numParticipants: bigint;
   };
 }
 

@@ -13,6 +13,7 @@ contract PollManager {
         string question;
         Option[] options;
         bool isActive;
+        uint numParticipants;
     }
 
     mapping(uint256 => Poll) polls;
@@ -34,6 +35,7 @@ contract PollManager {
         poll.creator = msg.sender;
         poll.isActive = true;
         poll.question = question;
+        poll.numParticipants = 0;
         for (uint i = 0; i < optionNames.length; i++) {
             poll.options.push(Option({name: optionNames[i], voteCount: 0}));
         }
@@ -57,6 +59,7 @@ contract PollManager {
             "you have already voted on this poll"
         );
         polls[pollId].options[optionId].voteCount++;
+        polls[pollId].numParticipants++;
         voteRecords[pollId][msg.sender] = true;
     }
 }

@@ -30,6 +30,7 @@ describe("PollManager", () => {
     expect(poll.creator).to.equal(signers[0].address);
     expect(poll.isActive).to.equal(true);
     expect(poll.question).to.equal(pollData.question);
+    expect(poll.numParticipants).to.equal(0);
     expect(poll.options.length).to.equal(pollData.options.length);
     expect(poll.options[0].name).to.equal(pollData.options[0]);
     expect(poll.options[0].voteCount).to.equal(0);
@@ -47,6 +48,7 @@ describe("PollManager", () => {
 
     const poll = await pollManager.getPoll(0);
     expect(poll.options[0].voteCount).to.equal(1);
+    expect(poll.numParticipants).to.equal(1);
   });
 
   it("should revert when voting again", async () => {
@@ -78,11 +80,13 @@ describe("PollManager", () => {
     await pollManager.vote(0, 0);
     let poll = await pollManager.getPoll(0);
     expect(poll.options[0].voteCount).to.equal(1);
+    expect(poll.numParticipants).to.equal(1);
 
     // person 2 voting
     pollManager = pollManager.connect(signers[2]);
     await pollManager.vote(0, 0);
     poll = await pollManager.getPoll(0);
     expect(poll.options[0].voteCount).to.equal(2);
+    expect(poll.numParticipants).to.equal(2);
   });
 });
