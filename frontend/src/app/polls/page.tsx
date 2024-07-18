@@ -27,24 +27,50 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreatePollDialog } from "@/components/create-poll-dialog";
+import useContractContext from "@/hooks/use-contract";
 
 interface PollOption {
   name: string;
-  voteCount: number;
+  voteCount: bigint;
 }
 
 interface PollData {
-  id: number;
+  id: bigint;
   creator: string;
   question: string;
   options: PollOption[];
   isActive: boolean;
+  numParticipants: bigint;
 }
 
 const Polls = () => {
   const [polls, setPolls] = useState<PollData[]>([]);
+  const { contract } = useContractContext();
+
+  useEffect(() => {
+    const fetchPolls = async () => {
+      const _polls = await contract.getPolls();
+      const polls: PollData[] = [];
+      _polls.forEach((p) => {
+        const newPoll: PollData = {
+          id: p.id,
+          creator: p.creator,
+          question: p.question,
+          options: p.options.map((o) => ({
+            name: o.name,
+            voteCount: o.voteCount,
+          })),
+          isActive: p.isActive,
+          numParticipants: p.numParticipants,
+        };
+        polls.push(newPoll);
+      });
+      setPolls(polls);
+    };
+    fetchPolls();
+  }, [contract]);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -100,72 +126,21 @@ const Polls = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          Laser Lemonade Machine
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">Draft</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          $499.99
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          Hypernova Headphones
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">Active</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          $129.99
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          AeroGlow Desk Lamp
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">Active</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          $39.99
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          TechTonic Energy Drink
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">Draft</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          $2.99
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          Gamer Gear Pro Controller
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">Active</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          $59.99
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          Luminous VR Headset
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">Active</Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          $199.99
-                        </TableCell>
-                      </TableRow>
+                      {polls.map((p, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium">
+                            {p.question}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {p.isActive ? "Active" : "Completed"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {p.numParticipants.toString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </CardContent>
