@@ -12,9 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import useContractContext from "@/hooks/use-contract";
 import { PlusCircle } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 
-export function CreatePollDialog() {
+export function CreatePollDialog({
+  fetchPolls,
+}: {
+  fetchPolls: () => Promise<void>;
+}) {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -34,6 +38,7 @@ export function CreatePollDialog() {
     await txResponse.wait();
     reset();
     setDialogOpen(false);
+    await fetchPolls();
   };
 
   return (

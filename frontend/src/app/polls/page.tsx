@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreatePollDialog } from "@/components/create-poll-dialog";
 import useContractContext from "@/hooks/use-contract";
 import useWalletContext from "@/hooks/use-wallet";
@@ -21,28 +21,29 @@ const Polls = () => {
   const { signer } = useWalletContext();
   const { contract } = useContractContext();
 
-  useEffect(() => {
-    const fetchPolls = async () => {
-      const _polls = await contract.getPolls();
-      const polls: PollData[] = [];
-      _polls.forEach((p) => {
-        const newPoll: PollData = {
-          id: p.id,
-          creator: p.creator,
-          question: p.question,
-          options: p.options.map((o) => ({
-            name: o.name,
-            voteCount: o.voteCount,
-          })),
-          isActive: p.isActive,
-          numParticipants: p.numParticipants,
-        };
-        polls.push(newPoll);
-      });
-      setPolls(polls);
-    };
-    fetchPolls();
+  const fetchPolls = useCallback(async () => {
+    const _polls = await contract.getPolls();
+    const polls: PollData[] = [];
+    _polls.forEach((p) => {
+      const newPoll: PollData = {
+        id: p.id,
+        creator: p.creator,
+        question: p.question,
+        options: p.options.map((o) => ({
+          name: o.name,
+          voteCount: o.voteCount,
+        })),
+        isActive: p.isActive,
+        numParticipants: p.numParticipants,
+      };
+      polls.push(newPoll);
+    });
+    setPolls(polls);
   }, [contract]);
+
+  useEffect(() => {
+    fetchPolls();
+  }, [fetchPolls]);
 
   useEffect(() => {
     const findCurrUserPolls = async () => {
@@ -64,7 +65,7 @@ const Polls = () => {
                 <TabsTrigger value="all">All Polls</TabsTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
-                <CreatePollDialog />
+                <CreatePollDialog fetchPolls={fetchPolls} />
               </div>
             </div>
             <TabsContent value="all">
