@@ -48,6 +48,14 @@ contract PollManager {
         return polls[pollId];
     }
 
+    function getPolls() public view returns (Poll[] memory) {
+        Poll[] memory result = new Poll[](numPolls);
+        for (uint i = 0; i < numPolls; i++) {
+            result[i] = polls[i];
+        }
+        return result;
+    }
+
     function vote(uint pollId, uint optionId) external {
         require(polls[pollId].isActive, "poll is closed now");
         require(

@@ -57,7 +57,7 @@ export declare namespace PollManager {
 
 export interface PollManagerInterface extends Interface {
   getFunction(
-    nameOrSignature: "createPoll" | "getPoll" | "numPolls" | "vote"
+    nameOrSignature: "createPoll" | "getPoll" | "getPolls" | "numPolls" | "vote"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -68,6 +68,7 @@ export interface PollManagerInterface extends Interface {
     functionFragment: "getPoll",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "getPolls", values?: undefined): string;
   encodeFunctionData(functionFragment: "numPolls", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "vote",
@@ -76,6 +77,7 @@ export interface PollManagerInterface extends Interface {
 
   decodeFunctionResult(functionFragment: "createPoll", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getPoll", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getPolls", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "numPolls", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "vote", data: BytesLike): Result;
 }
@@ -135,6 +137,8 @@ export interface PollManager extends BaseContract {
     "view"
   >;
 
+  getPolls: TypedContractMethod<[], [PollManager.PollStructOutput[]], "view">;
+
   numPolls: TypedContractMethod<[], [bigint], "view">;
 
   vote: TypedContractMethod<
@@ -161,6 +165,9 @@ export interface PollManager extends BaseContract {
     [PollManager.PollStructOutput],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "getPolls"
+  ): TypedContractMethod<[], [PollManager.PollStructOutput[]], "view">;
   getFunction(
     nameOrSignature: "numPolls"
   ): TypedContractMethod<[], [bigint], "view">;
