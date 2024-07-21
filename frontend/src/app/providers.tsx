@@ -2,8 +2,10 @@
 import React, { FC, ReactNode, useState } from "react";
 import { WalletContext } from "@/contexts/wallet-context";
 import { ContractContext } from "@/contexts/contract-context";
-import { BrowserProvider, Contract, Signer } from "ethers";
+import { BrowserProvider, Signer } from "ethers";
 import { ThemeProvider } from "@/components/theme-provider";
+import { PollManager } from "@/contracts/types";
+import { PollsContext } from "@/contexts/polls-context";
 
 const ContextProviders: FC<{ children: ReactNode }> = ({ children }) => {
   const [provider, setProvider] = useState<BrowserProvider>(
@@ -11,7 +13,8 @@ const ContextProviders: FC<{ children: ReactNode }> = ({ children }) => {
   );
   const [signer, setSigner] = useState<Signer>({} as Signer);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [contract, setContract] = useState<Contract>({} as Contract);
+  const [contract, setContract] = useState<PollManager>({} as PollManager);
+  const [polls, setPolls] = useState<PollData[]>([]);
 
   return (
     <WalletContext.Provider
@@ -25,14 +28,16 @@ const ContextProviders: FC<{ children: ReactNode }> = ({ children }) => {
       }}
     >
       <ContractContext.Provider value={{ contract, setContract }}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <PollsContext.Provider value={{ polls, setPolls }}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </PollsContext.Provider>
       </ContractContext.Provider>
     </WalletContext.Provider>
   );

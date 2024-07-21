@@ -14,9 +14,10 @@ import { CreatePollDialog } from "@/components/create-poll-dialog";
 import useContractContext from "@/hooks/use-contract-context";
 import useWalletContext from "@/hooks/use-wallet-context";
 import PollsTable from "@/components/polls-table";
+import usePollsContext from "@/hooks/use-polls-context";
 
 const Polls = () => {
-  const [polls, setPolls] = useState<PollData[]>([]);
+  const { polls, setPolls } = usePollsContext();
   const [currUserPolls, setCurrUserPolls] = useState<PollData[]>([]);
   const { signer } = useWalletContext();
   const { contract } = useContractContext();
@@ -39,7 +40,7 @@ const Polls = () => {
       polls.push(newPoll);
     });
     setPolls(polls);
-  }, [contract]);
+  }, [contract, setPolls]);
 
   useEffect(() => {
     fetchPolls();
