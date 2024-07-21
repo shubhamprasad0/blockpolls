@@ -7,8 +7,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import NoPolls from "./no-polls";
 
 const PollsTable = ({ polls }: { polls: PollData[] }) => {
+  if (polls.length === 0) {
+    return <NoPolls />;
+  }
+
   return (
     <Table>
       <TableHeader>
