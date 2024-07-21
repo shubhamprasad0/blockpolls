@@ -2,12 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import usePollsContext from "./use-polls-context";
 import useWalletConnect from "./use-wallet-connect";
 import { isEmpty } from "lodash";
+import useContract from "./use-contract";
 
 const useFetchPolls = () => {
   const { polls, setPolls } = usePollsContext();
   const [currUserPolls, setCurrUserPolls] = useState<PollData[]>([]);
-  const { signer, contract } = useWalletConnect();
-  // const { contract } = useContractContext();
+  const { signer } = useWalletConnect();
+  const { contract } = useContract();
 
   const fetchPolls = useCallback(async () => {
     if (isEmpty(contract)) {

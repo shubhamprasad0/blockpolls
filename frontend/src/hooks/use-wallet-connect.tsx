@@ -1,8 +1,6 @@
-import { useCallback, useEffect } from "react";
-import useContractContext from "./use-contract-context";
+import { useEffect } from "react";
 import useWalletContext from "./use-wallet-context";
 import { BrowserProvider } from "ethers";
-import { PollManager__factory } from "@/contracts/types";
 
 const useWalletConnect = () => {
   const {
@@ -13,20 +11,6 @@ const useWalletConnect = () => {
     isConnected,
     setIsConnected,
   } = useWalletContext();
-  const { setContract, contract } = useContractContext();
-
-  const createContractInstance = useCallback(
-    async (provider: BrowserProvider) => {
-      const contractAddress = process.env.NEXT_PUBLIC_POLLS_CONTRACT_ADDRESS;
-      if (!contractAddress) {
-        throw new Error("contract address is undefined");
-      }
-      const signer = await provider.getSigner();
-      const contract = PollManager__factory.connect(contractAddress, signer);
-      setContract(contract);
-    },
-    [setContract]
-  );
 
   useEffect(() => {
     const checkWalletStatus = async () => {
@@ -45,20 +29,18 @@ const useWalletConnect = () => {
       if (connected) {
         const provider = new BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        await createContractInstance(provider);
         setProvider(provider);
         setSigner(signer);
       }
       setIsConnected(connected);
     });
-  }, [setProvider, setSigner, setIsConnected, createContractInstance]);
+  }, [setProvider, setSigner, setIsConnected]);
 
   const connect = async () => {
     if (!isConnected) {
       if (typeof window.ethereum !== "undefined") {
         const provider = new BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        await createContractInstance(provider);
         setProvider(provider);
         setSigner(signer);
         setIsConnected(true);
@@ -68,7 +50,7 @@ const useWalletConnect = () => {
     }
   };
 
-  return { connect, provider, signer, isConnected, contract };
+  return { connect, provider, signer, isConnected };
 };
 
 export default useWalletConnect;
