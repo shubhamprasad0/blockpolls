@@ -5,9 +5,15 @@ import { BrowserProvider } from "ethers";
 import { PollManager__factory } from "@/contracts/types";
 
 const useWalletConnect = () => {
-  const { setProvider, setSigner, isConnected, setIsConnected } =
-    useWalletContext();
-  const { setContract } = useContractContext();
+  const {
+    provider,
+    setProvider,
+    signer,
+    setSigner,
+    isConnected,
+    setIsConnected,
+  } = useWalletContext();
+  const { setContract, contract } = useContractContext();
 
   const createContractInstance = useCallback(
     async (provider: BrowserProvider) => {
@@ -62,7 +68,7 @@ const useWalletConnect = () => {
     }
   };
 
-  return connect;
+  return { connect, provider, signer, isConnected, contract };
 };
 
 export default useWalletConnect;

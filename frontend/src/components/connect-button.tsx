@@ -5,7 +5,7 @@ import useWalletConnect from "@/hooks/use-wallet-connect";
 
 const ConnectButton = () => {
   const { isConnected } = useWalletContext();
-  const connect = useWalletConnect();
+  const { connect } = useWalletConnect();
 
   return (
     <Button

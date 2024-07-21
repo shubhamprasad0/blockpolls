@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import usePollsContext from "./use-polls-context";
-import useWalletContext from "./use-wallet-context";
-import useContractContext from "./use-contract-context";
+import useWalletConnect from "./use-wallet-connect";
+import { isEmpty } from "lodash";
 
 const useFetchPolls = () => {
   const { polls, setPolls } = usePollsContext();
   const [currUserPolls, setCurrUserPolls] = useState<PollData[]>([]);
-  const { signer } = useWalletContext();
-  const { contract } = useContractContext();
+  const { signer, contract } = useWalletConnect();
+  // const { contract } = useContractContext();
 
   const fetchPolls = useCallback(async () => {
+    if (isEmpty(contract)) {
+      return;
+    }
+
     const _polls = await contract.getPolls();
     const polls: PollData[] = [];
     _polls.forEach((p) => {
@@ -35,6 +39,9 @@ const useFetchPolls = () => {
 
   useEffect(() => {
     const findCurrUserPolls = async () => {
+      if (isEmpty(signer)) {
+        return;
+      }
       const currUserAddress = await signer.getAddress();
       const currUserPolls = polls.filter((p) => p.creator === currUserAddress);
       setCurrUserPolls(currUserPolls);
