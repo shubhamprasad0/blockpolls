@@ -1,7 +1,7 @@
 "use client";
 
 import Hero from "@/components/hero";
-import useWalletContext from "@/hooks/use-wallet";
+import useWalletContext from "@/hooks/use-wallet-context";
 import Polls from "@/components/polls";
 
 export default function App() {

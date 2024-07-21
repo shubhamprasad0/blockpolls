@@ -1,6 +1,6 @@
 "use client";
-import useWalletContext from "@/hooks/use-wallet";
-import useContractContext from "@/hooks/use-contract";
+import useWalletContext from "@/hooks/use-wallet-context";
+import useContractContext from "@/hooks/use-contract-context";
 import { BrowserProvider } from "ethers";
 import { useCallback, useEffect } from "react";
 import { Button } from "./ui/button";

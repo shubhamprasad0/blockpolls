@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import useContractContext from "@/hooks/use-contract";
+import useContractContext from "@/hooks/use-contract-context";
 import { PlusCircle } from "lucide-react";
 import React, { useState } from "react";
 

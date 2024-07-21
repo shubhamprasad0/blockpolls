@@ -11,8 +11,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreatePollDialog } from "@/components/create-poll-dialog";
-import useContractContext from "@/hooks/use-contract";
-import useWalletContext from "@/hooks/use-wallet";
+import useContractContext from "@/hooks/use-contract-context";
+import useWalletContext from "@/hooks/use-wallet-context";
 import PollsTable from "@/components/polls-table";
 
 const Polls = () => {
