@@ -9,51 +9,12 @@ import {
 } from "@/components/ui/card";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreatePollDialog } from "@/components/create-poll-dialog";
-import useContractContext from "@/hooks/use-contract-context";
-import useWalletContext from "@/hooks/use-wallet-context";
 import PollsTable from "@/components/polls-table";
-import usePollsContext from "@/hooks/use-polls-context";
+import useFetchPolls from "@/hooks/use-fetch-polls";
 
 const Polls = () => {
-  const { polls, setPolls } = usePollsContext();
-  const [currUserPolls, setCurrUserPolls] = useState<PollData[]>([]);
-  const { signer } = useWalletContext();
-  const { contract } = useContractContext();
-
-  const fetchPolls = useCallback(async () => {
-    const _polls = await contract.getPolls();
-    const polls: PollData[] = [];
-    _polls.forEach((p) => {
-      const newPoll: PollData = {
-        id: p.id,
-        creator: p.creator,
-        question: p.question,
-        options: p.options.map((o) => ({
-          name: o.name,
-          voteCount: o.voteCount,
-        })),
-        isActive: p.isActive,
-        numParticipants: p.numParticipants,
-      };
-      polls.push(newPoll);
-    });
-    setPolls(polls);
-  }, [contract, setPolls]);
-
-  useEffect(() => {
-    fetchPolls();
-  }, [fetchPolls]);
-
-  useEffect(() => {
-    const findCurrUserPolls = async () => {
-      const currUserAddress = await signer.getAddress();
-      const currUserPolls = polls.filter((p) => p.creator === currUserAddress);
-      setCurrUserPolls(currUserPolls);
-    };
-    findCurrUserPolls();
-  }, [polls, signer]);
+  const { polls, currUserPolls, fetchPolls } = useFetchPolls();
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
