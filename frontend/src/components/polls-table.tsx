@@ -8,8 +8,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import NoPolls from "./no-polls";
+import { useRouter } from "next/navigation";
 
 const PollsTable = ({ polls }: { polls: PollData[] }) => {
+  const router = useRouter();
+
   if (polls.length === 0) {
     return <NoPolls />;
   }
@@ -27,7 +30,13 @@ const PollsTable = ({ polls }: { polls: PollData[] }) => {
       </TableHeader>
       <TableBody>
         {polls.map((p, i) => (
-          <TableRow key={i}>
+          <TableRow
+            className="hover:cursor-pointer"
+            key={i}
+            onClick={() => {
+              router.push(`/polls/${p.id}`);
+            }}
+          >
             <TableCell className="font-medium">{p.question}</TableCell>
             <TableCell>
               <Badge variant="outline">
