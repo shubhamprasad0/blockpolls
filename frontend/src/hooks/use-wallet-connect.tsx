@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useWalletContext from "./use-wallet-context";
 import { BrowserProvider } from "ethers";
 
@@ -11,6 +11,8 @@ const useWalletConnect = () => {
     isConnected,
     setIsConnected,
   } = useWalletContext();
+
+  const [signerAddress, setSignerAddress] = useState("");
 
   useEffect(() => {
     const checkWalletStatus = async () => {
@@ -29,8 +31,10 @@ const useWalletConnect = () => {
       if (connected) {
         const provider = new BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
+        const address = await signer.getAddress();
         setProvider(provider);
         setSigner(signer);
+        setSignerAddress(address);
       }
       setIsConnected(connected);
     });
@@ -41,8 +45,10 @@ const useWalletConnect = () => {
       if (typeof window.ethereum !== "undefined") {
         const provider = new BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
+        const address = await signer.getAddress();
         setProvider(provider);
         setSigner(signer);
+        setSignerAddress(address);
         setIsConnected(true);
       } else {
         throw new Error("metamask not installed");
@@ -50,7 +56,7 @@ const useWalletConnect = () => {
     }
   };
 
-  return { connect, provider, signer, isConnected };
+  return { connect, provider, signer, isConnected, signerAddress };
 };
 
 export default useWalletConnect;
