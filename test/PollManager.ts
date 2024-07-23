@@ -119,4 +119,30 @@ describe("PollManager", () => {
     expect(polls[1].creator).to.equal(signers[2].address);
     expect(polls[2].creator).to.equal(signers[3].address);
   });
+
+  it("should allow poll creator to close poll", async () => {
+    let { pollManager, signers } = await loadFixture(createPoll);
+
+    await pollManager.closePoll(0);
+
+    const poll = await pollManager.getPoll(0);
+    expect(poll.isActive).to.equal(false);
+  });
+
+  it("should not allow other users to close poll", async () => {
+    let { pollManager, signers } = await loadFixture(createPoll);
+    pollManager = pollManager.connect(signers[1]);
+
+    await expect(pollManager.closePoll(0)).to.be.revertedWith(
+      "only poll creator can close the poll"
+    );
+  });
+
+  it("should not allow to close already closed poll", async () => {
+    let { pollManager, signers } = await loadFixture(createPoll);
+    await pollManager.closePoll(0);
+    await expect(pollManager.closePoll(0)).to.be.revertedWith(
+      "poll is already closed"
+    );
+  });
 });

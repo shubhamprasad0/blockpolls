@@ -57,9 +57,19 @@ export declare namespace PollManager {
 
 export interface PollManagerInterface extends Interface {
   getFunction(
-    nameOrSignature: "createPoll" | "getPoll" | "getPolls" | "numPolls" | "vote"
+    nameOrSignature:
+      | "closePoll"
+      | "createPoll"
+      | "getPoll"
+      | "getPolls"
+      | "numPolls"
+      | "vote"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "closePoll",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "createPoll",
     values: [string, string[]]
@@ -75,6 +85,7 @@ export interface PollManagerInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
 
+  decodeFunctionResult(functionFragment: "closePoll", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "createPoll", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getPoll", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getPolls", data: BytesLike): Result;
@@ -125,6 +136,8 @@ export interface PollManager extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  closePoll: TypedContractMethod<[pollId: BigNumberish], [void], "nonpayable">;
+
   createPoll: TypedContractMethod<
     [question: string, optionNames: string[]],
     [void],
@@ -151,6 +164,9 @@ export interface PollManager extends BaseContract {
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "closePoll"
+  ): TypedContractMethod<[pollId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "createPoll"
   ): TypedContractMethod<

@@ -70,4 +70,13 @@ contract PollManager {
         polls[pollId].numParticipants++;
         voteRecords[pollId][msg.sender] = true;
     }
+
+    function closePoll(uint pollId) external {
+        require(
+            polls[pollId].creator == msg.sender,
+            "only poll creator can close the poll"
+        );
+        require(polls[pollId].isActive, "poll is already closed");
+        polls[pollId].isActive = false;
+    }
 }
