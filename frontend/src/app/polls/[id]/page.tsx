@@ -7,14 +7,33 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import useContract from "@/hooks/use-contract";
 import useFetchPolls from "@/hooks/use-fetch-polls";
 import useWalletConnect from "@/hooks/use-wallet-connect";
 import { cn } from "@/lib/utils";
+import { TooltipContent } from "@radix-ui/react-tooltip";
 import { useParams } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-const PollQuestion = ({ question }: { question: string }) => {
+const PollHeader = ({
+  poll,
+  sameUser,
+}: {
+  poll: PollData;
+  sameUser: boolean;
+}) => {
+  const { contract } = useContract();
+
+  const closePoll = async () => {
+    const tx = await contract.closePoll(poll.id);
+    await tx.wait();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -23,9 +42,31 @@ const PollQuestion = ({ question }: { question: string }) => {
         </p>
       </CardHeader>
       <CardContent>
-        <h1 className="scroll-m-20 text-2xl md:text-3xl font-semibold tracking-tight">
-          {question}
-        </h1>
+        <div className="flex justify-between">
+          <h1 className="scroll-m-20 text-2xl md:text-3xl font-semibold tracking-tight">
+            {poll.question}
+          </h1>
+          {sameUser ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    onClick={closePoll}
+                    disabled={!poll.isActive}
+                  >
+                    Close Poll
+                  </Button>
+                </TooltipTrigger>
+                {!poll.isActive && (
+                  <TooltipContent>
+                    <p className="text-sm p-2">Poll is already closed</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   );
@@ -73,6 +114,11 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
   );
   const { contract } = useContract();
   const [voted, setVoted] = useState(false);
+
+  const votingDisabled = useMemo(
+    () => voted || !poll.isActive,
+    [voted, poll.isActive]
+  );
 
   const reset = () => {
     setIsVoting(false);
@@ -132,14 +178,27 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
             {/* {sameUser ? (
               <Button variant="destructive">Close Poll</Button>
             ) : null} */}
-            <Button
-              onClick={() => {
-                setIsVoting(true);
-              }}
-              disabled={voted}
-            >
-              Vote
-            </Button>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className={cn(votingDisabled && "hover:cursor-not-allowed")}
+                    onClick={() => {
+                      setIsVoting(true);
+                    }}
+                    disabled={votingDisabled}
+                  >
+                    Vote
+                  </Button>
+                </TooltipTrigger>
+                {!poll.isActive && (
+                  <TooltipContent>
+                    <p className="text-sm p-2">Voting is closed now</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </>
         )}
       </CardFooter>
@@ -179,7 +238,7 @@ const PollPage = () => {
 
   return (
     <div className="container mt-16">
-      <PollQuestion question={poll.question} />
+      <PollHeader poll={poll} sameUser={sameUser} />
       <PollOptions poll={poll} sameUser={sameUser} />
     </div>
   );
