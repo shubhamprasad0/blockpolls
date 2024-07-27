@@ -62,6 +62,7 @@ export interface PollManagerInterface extends Interface {
       | "createPoll"
       | "getPoll"
       | "getPolls"
+      | "hasVoted"
       | "numPolls"
       | "vote"
   ): FunctionFragment;
@@ -79,6 +80,10 @@ export interface PollManagerInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "getPolls", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "hasVoted",
+    values: [AddressLike, BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "numPolls", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "vote",
@@ -89,6 +94,7 @@ export interface PollManagerInterface extends Interface {
   decodeFunctionResult(functionFragment: "createPoll", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getPoll", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getPolls", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "hasVoted", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "numPolls", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "vote", data: BytesLike): Result;
 }
@@ -152,6 +158,12 @@ export interface PollManager extends BaseContract {
 
   getPolls: TypedContractMethod<[], [PollManager.PollStructOutput[]], "view">;
 
+  hasVoted: TypedContractMethod<
+    [voterAddress: AddressLike, pollId: BigNumberish],
+    [boolean],
+    "view"
+  >;
+
   numPolls: TypedContractMethod<[], [bigint], "view">;
 
   vote: TypedContractMethod<
@@ -184,6 +196,13 @@ export interface PollManager extends BaseContract {
   getFunction(
     nameOrSignature: "getPolls"
   ): TypedContractMethod<[], [PollManager.PollStructOutput[]], "view">;
+  getFunction(
+    nameOrSignature: "hasVoted"
+  ): TypedContractMethod<
+    [voterAddress: AddressLike, pollId: BigNumberish],
+    [boolean],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "numPolls"
   ): TypedContractMethod<[], [bigint], "view">;

@@ -79,4 +79,11 @@ contract PollManager {
         require(polls[pollId].isActive, "poll is already closed");
         polls[pollId].isActive = false;
     }
+
+    function hasVoted(
+        address voterAddress,
+        uint pollId
+    ) public view returns (bool) {
+        return voteRecords[pollId][voterAddress];
+    }
 }

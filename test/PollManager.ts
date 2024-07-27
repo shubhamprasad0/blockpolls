@@ -61,7 +61,11 @@ describe("PollManager", () => {
   });
 
   it("should revert when poll is closed", async () => {
-    // TODO: implement
+    let { pollManager } = await loadFixture(createPoll);
+    await pollManager.closePoll(0);
+    await expect(pollManager.vote(0, 0)).to.be.revertedWith(
+      "poll is closed now"
+    );
   });
 
   it("should revert when given invalid option id", async () => {
@@ -144,5 +148,12 @@ describe("PollManager", () => {
     await expect(pollManager.closePoll(0)).to.be.revertedWith(
       "poll is already closed"
     );
+  });
+
+  it("should be able to tell if an address has voted or not", async () => {
+    let { pollManager, signers } = await loadFixture(createPoll);
+    await pollManager.vote(0, 0);
+    expect(await pollManager.hasVoted(signers[0].address, 0)).to.equal(true);
+    expect(await pollManager.hasVoted(signers[1].address, 0)).to.equal(false);
   });
 });
