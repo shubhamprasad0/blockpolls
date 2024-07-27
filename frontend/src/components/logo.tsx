@@ -5,7 +5,7 @@ const Logo = () => {
   return (
     <Link href="/">
       <h1 className="scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-3xl">
-        polls
+        blockpolls
       </h1>
     </Link>
   );
