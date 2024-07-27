@@ -43,7 +43,7 @@ const PollsTable = ({ polls }: { polls: PollData[] }) => {
               <Badge
                 className={cn(
                   "uppercase tracking-widest font-black",
-                  p.isActive && "bg-success text-background",
+                  p.isActive && "bg-success text-secondary",
                   !p.isActive && "bg-destructive"
                 )}
                 variant="outline"

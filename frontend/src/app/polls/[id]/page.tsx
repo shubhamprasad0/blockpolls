@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useContract from "@/hooks/use-contract";
+import useFetchHasVoted from "@/hooks/use-fetch-has-voted";
 import useFetchPolls from "@/hooks/use-fetch-polls";
 import useWalletConnect from "@/hooks/use-wallet-connect";
 import { cn } from "@/lib/utils";
@@ -59,7 +60,7 @@ const PollHeader = ({
                   </Button>
                 </TooltipTrigger>
                 {!poll.isActive && (
-                  <TooltipContent>
+                  <TooltipContent className="bg-secondary border rounded-lg">
                     <p className="text-sm p-2">Poll is already closed</p>
                   </TooltipContent>
                 )}
@@ -113,11 +114,11 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
     BigInt(-1)
   );
   const { contract } = useContract();
-  const [voted, setVoted] = useState(false);
+  const { hasVoted, setHasVoted } = useFetchHasVoted({ pollId: poll.id });
 
   const votingDisabled = useMemo(
-    () => voted || !poll.isActive,
-    [voted, poll.isActive]
+    () => hasVoted || !poll.isActive,
+    [hasVoted, poll.isActive]
   );
 
   const reset = () => {
@@ -130,7 +131,7 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
     const tx = await contract.vote(poll.id, selectedOptionIndex);
     await tx.wait();
     reset();
-    setVoted(true);
+    setHasVoted(true);
   };
 
   return (
@@ -175,10 +176,6 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
           </>
         ) : (
           <>
-            {/* {sameUser ? (
-              <Button variant="destructive">Close Poll</Button>
-            ) : null} */}
-
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -195,6 +192,13 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
                 {!poll.isActive && (
                   <TooltipContent>
                     <p className="text-sm p-2">Voting is closed now</p>
+                  </TooltipContent>
+                )}
+                {poll.isActive && hasVoted && (
+                  <TooltipContent className="bg-secondary border rounded-lg">
+                    <p className="text-sm p-2">
+                      You have already voted on this poll
+                    </p>
                   </TooltipContent>
                 )}
               </Tooltip>
