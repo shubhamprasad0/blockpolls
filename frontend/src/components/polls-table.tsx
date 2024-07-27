@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import NoPolls from "./no-polls";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const PollsTable = ({ polls }: { polls: PollData[] }) => {
   const router = useRouter();
@@ -22,7 +23,7 @@ const PollsTable = ({ polls }: { polls: PollData[] }) => {
       <TableHeader>
         <TableRow>
           <TableHead>Question</TableHead>
-          <TableHead>Status</TableHead>
+          <TableHead className="text-center">Status</TableHead>
           <TableHead className="hidden md:table-cell">
             Participant Count
           </TableHead>
@@ -38,9 +39,16 @@ const PollsTable = ({ polls }: { polls: PollData[] }) => {
             }}
           >
             <TableCell className="font-medium">{p.question}</TableCell>
-            <TableCell>
-              <Badge variant="outline">
-                {p.isActive ? "Active" : "Completed"}
+            <TableCell className="text-center">
+              <Badge
+                className={cn(
+                  "uppercase tracking-widest font-black",
+                  p.isActive && "bg-success text-background",
+                  !p.isActive && "bg-destructive"
+                )}
+                variant="outline"
+              >
+                {p.isActive ? "Active" : "Closed"}
               </Badge>
             </TableCell>
             <TableCell className="hidden md:table-cell">
