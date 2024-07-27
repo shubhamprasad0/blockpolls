@@ -147,8 +147,10 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
             <div
               key={i}
               onClick={() => {
-                setSelectedOptionIndex(BigInt(i));
-                setSelectedOption(o);
+                if (isVoting) {
+                  setSelectedOptionIndex(BigInt(i));
+                  setSelectedOption(o);
+                }
               }}
             >
               <PollOption
