@@ -23,6 +23,31 @@ contract PollManager {
 
     uint public numPolls;
 
+    // Errors
+    error ErrPollClosed(uint pollId);
+    error InvalidOption(uint pollId, uint numOptions, uint invalidOptionId);
+    error AlreadyVoted(uint pollId, address voterId);
+    error Unauthorized(uint pollId, address senderId);
+
+    // Events
+    event PollCreated(uint indexed pollId, address indexed pollCreator);
+    event VoteRegistered(
+        uint indexed pollId,
+        address indexed pollCreator,
+        address indexed voter,
+        uint optionId,
+        string optionName
+    );
+    event PollClosed(uint indexed pollId, address indexed pollCreator);
+
+    // Modifiers
+    modifier pollOpen(uint pollId) {
+        if (!polls[pollId].isActive) {
+            revert ErrPollClosed({pollId: pollId});
+        }
+        _;
+    }
+
     function createPoll(
         string calldata question,
         string[] calldata optionNames
@@ -42,6 +67,8 @@ contract PollManager {
 
         // increment count of polls
         numPolls++;
+
+        emit PollCreated(id, msg.sender);
     }
 
     function getPoll(uint pollId) public view returns (Poll memory) {
@@ -56,28 +83,37 @@ contract PollManager {
         return result;
     }
 
-    function vote(uint pollId, uint optionId) external {
-        require(polls[pollId].isActive, "poll is closed now");
-        require(
-            optionId >= 0 && optionId < polls[pollId].options.length,
-            "invalid option id"
-        );
-        require(
-            !voteRecords[pollId][msg.sender],
-            "you have already voted on this poll"
-        );
+    function vote(uint pollId, uint optionId) external pollOpen(pollId) {
+        if (optionId < 0 || optionId >= polls[pollId].options.length) {
+            revert InvalidOption({
+                pollId: pollId,
+                numOptions: polls[pollId].options.length,
+                invalidOptionId: optionId
+            });
+        }
+        if (voteRecords[pollId][msg.sender]) {
+            revert AlreadyVoted({pollId: pollId, voterId: msg.sender});
+        }
+
         polls[pollId].options[optionId].voteCount++;
         polls[pollId].numParticipants++;
         voteRecords[pollId][msg.sender] = true;
+
+        emit VoteRegistered(
+            pollId,
+            polls[pollId].creator,
+            msg.sender,
+            optionId,
+            polls[pollId].options[optionId].name
+        );
     }
 
-    function closePoll(uint pollId) external {
-        require(
-            polls[pollId].creator == msg.sender,
-            "only poll creator can close the poll"
-        );
-        require(polls[pollId].isActive, "poll is already closed");
+    function closePoll(uint pollId) external pollOpen(pollId) {
+        if (polls[pollId].creator != msg.sender) {
+            revert Unauthorized({pollId: pollId, senderId: msg.sender});
+        }
         polls[pollId].isActive = false;
+        emit PollClosed(pollId, polls[pollId].creator);
     }
 
     function hasVoted(

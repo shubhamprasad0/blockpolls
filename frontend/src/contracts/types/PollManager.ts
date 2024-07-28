@@ -8,6 +8,7 @@ import type {
   FunctionFragment,
   Result,
   Interface,
+  EventFragment,
   AddressLike,
   ContractRunner,
   ContractMethod,
@@ -17,6 +18,7 @@ import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
+  TypedLogDescription,
   TypedListener,
   TypedContractMethod,
 } from "./common";
@@ -67,6 +69,10 @@ export interface PollManagerInterface extends Interface {
       | "vote"
   ): FunctionFragment;
 
+  getEvent(
+    nameOrSignatureOrTopic: "PollClosed" | "PollCreated" | "VoteRegistered"
+  ): EventFragment;
+
   encodeFunctionData(
     functionFragment: "closePoll",
     values: [BigNumberish]
@@ -97,6 +103,60 @@ export interface PollManagerInterface extends Interface {
   decodeFunctionResult(functionFragment: "hasVoted", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "numPolls", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "vote", data: BytesLike): Result;
+}
+
+export namespace PollClosedEvent {
+  export type InputTuple = [pollId: BigNumberish, pollCreator: AddressLike];
+  export type OutputTuple = [pollId: bigint, pollCreator: string];
+  export interface OutputObject {
+    pollId: bigint;
+    pollCreator: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace PollCreatedEvent {
+  export type InputTuple = [pollId: BigNumberish, pollCreator: AddressLike];
+  export type OutputTuple = [pollId: bigint, pollCreator: string];
+  export interface OutputObject {
+    pollId: bigint;
+    pollCreator: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace VoteRegisteredEvent {
+  export type InputTuple = [
+    pollId: BigNumberish,
+    pollCreator: AddressLike,
+    voter: AddressLike,
+    optionId: BigNumberish,
+    optionName: string
+  ];
+  export type OutputTuple = [
+    pollId: bigint,
+    pollCreator: string,
+    voter: string,
+    optionId: bigint,
+    optionName: string
+  ];
+  export interface OutputObject {
+    pollId: bigint;
+    pollCreator: string;
+    voter: string;
+    optionId: bigint;
+    optionName: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export interface PollManager extends BaseContract {
@@ -214,5 +274,60 @@ export interface PollManager extends BaseContract {
     "nonpayable"
   >;
 
-  filters: {};
+  getEvent(
+    key: "PollClosed"
+  ): TypedContractEvent<
+    PollClosedEvent.InputTuple,
+    PollClosedEvent.OutputTuple,
+    PollClosedEvent.OutputObject
+  >;
+  getEvent(
+    key: "PollCreated"
+  ): TypedContractEvent<
+    PollCreatedEvent.InputTuple,
+    PollCreatedEvent.OutputTuple,
+    PollCreatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "VoteRegistered"
+  ): TypedContractEvent<
+    VoteRegisteredEvent.InputTuple,
+    VoteRegisteredEvent.OutputTuple,
+    VoteRegisteredEvent.OutputObject
+  >;
+
+  filters: {
+    "PollClosed(uint256,address)": TypedContractEvent<
+      PollClosedEvent.InputTuple,
+      PollClosedEvent.OutputTuple,
+      PollClosedEvent.OutputObject
+    >;
+    PollClosed: TypedContractEvent<
+      PollClosedEvent.InputTuple,
+      PollClosedEvent.OutputTuple,
+      PollClosedEvent.OutputObject
+    >;
+
+    "PollCreated(uint256,address)": TypedContractEvent<
+      PollCreatedEvent.InputTuple,
+      PollCreatedEvent.OutputTuple,
+      PollCreatedEvent.OutputObject
+    >;
+    PollCreated: TypedContractEvent<
+      PollCreatedEvent.InputTuple,
+      PollCreatedEvent.OutputTuple,
+      PollCreatedEvent.OutputObject
+    >;
+
+    "VoteRegistered(uint256,address,address,uint256,string)": TypedContractEvent<
+      VoteRegisteredEvent.InputTuple,
+      VoteRegisteredEvent.OutputTuple,
+      VoteRegisteredEvent.OutputObject
+    >;
+    VoteRegistered: TypedContractEvent<
+      VoteRegisteredEvent.InputTuple,
+      VoteRegisteredEvent.OutputTuple,
+      VoteRegisteredEvent.OutputObject
+    >;
+  };
 }

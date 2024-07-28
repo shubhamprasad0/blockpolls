@@ -41,6 +41,18 @@ describe("PollManager", () => {
     expect(numPolls).to.equal(1);
   });
 
+  it("should emit PollCreated event", async () => {
+    const { pollManager, signers } = await loadFixture(deployContractFixture);
+    const pollData = {
+      question: "Should I go on?",
+      options: ["yes", "no"],
+    };
+
+    await expect(pollManager.createPoll(pollData.question, pollData.options))
+      .to.emit(pollManager, "PollCreated")
+      .withArgs(0, signers[0].address);
+  });
+
   it("should be able to vote", async () => {
     let { pollManager, signers } = await loadFixture(createPoll);
     pollManager = pollManager.connect(signers[1]);
@@ -51,29 +63,43 @@ describe("PollManager", () => {
     expect(poll.numParticipants).to.equal(1);
   });
 
+  it("should emit VoteRegistered event", async () => {
+    let { pollManager, signers, pollData } = await loadFixture(createPoll);
+    pollManager = pollManager.connect(signers[1]);
+    await expect(pollManager.vote(0, 0))
+      .to.emit(pollManager, "VoteRegistered")
+      .withArgs(
+        0,
+        signers[0].address,
+        signers[1].address,
+        0,
+        pollData.options[0]
+      );
+  });
+
   it("should revert when voting again", async () => {
     let { pollManager, signers } = await loadFixture(createPoll);
     pollManager = pollManager.connect(signers[1]);
     await pollManager.vote(0, 0);
-    await expect(pollManager.vote(0, 1)).to.be.revertedWith(
-      "you have already voted on this poll"
-    );
+    await expect(pollManager.vote(0, 1))
+      .to.be.revertedWithCustomError(pollManager, "AlreadyVoted")
+      .withArgs(0, signers[1].address);
   });
 
   it("should revert when poll is closed", async () => {
     let { pollManager } = await loadFixture(createPoll);
     await pollManager.closePoll(0);
-    await expect(pollManager.vote(0, 0)).to.be.revertedWith(
-      "poll is closed now"
-    );
+    await expect(pollManager.vote(0, 0))
+      .to.be.revertedWithCustomError(pollManager, "ErrPollClosed")
+      .withArgs(0);
   });
 
   it("should revert when given invalid option id", async () => {
     let { pollManager, signers } = await loadFixture(createPoll);
     pollManager = pollManager.connect(signers[1]);
-    await expect(pollManager.vote(0, 2)).to.be.revertedWith(
-      "invalid option id"
-    );
+    await expect(pollManager.vote(0, 2))
+      .to.be.revertedWithCustomError(pollManager, "InvalidOption")
+      .withArgs(0, 2, 2);
   });
 
   it("allows 2 different people to vote on the same poll", async () => {
@@ -125,7 +151,7 @@ describe("PollManager", () => {
   });
 
   it("should allow poll creator to close poll", async () => {
-    let { pollManager, signers } = await loadFixture(createPoll);
+    let { pollManager } = await loadFixture(createPoll);
 
     await pollManager.closePoll(0);
 
@@ -133,21 +159,29 @@ describe("PollManager", () => {
     expect(poll.isActive).to.equal(false);
   });
 
+  it("should emit PollClosed event", async () => {
+    let { pollManager, signers } = await loadFixture(createPoll);
+
+    await expect(pollManager.closePoll(0))
+      .to.emit(pollManager, "PollClosed")
+      .withArgs(0, signers[0].address);
+  });
+
   it("should not allow other users to close poll", async () => {
     let { pollManager, signers } = await loadFixture(createPoll);
     pollManager = pollManager.connect(signers[1]);
 
-    await expect(pollManager.closePoll(0)).to.be.revertedWith(
-      "only poll creator can close the poll"
-    );
+    await expect(pollManager.closePoll(0))
+      .to.be.revertedWithCustomError(pollManager, "Unauthorized")
+      .withArgs(0, signers[1].address);
   });
 
   it("should not allow to close already closed poll", async () => {
     let { pollManager, signers } = await loadFixture(createPoll);
     await pollManager.closePoll(0);
-    await expect(pollManager.closePoll(0)).to.be.revertedWith(
-      "poll is already closed"
-    );
+    await expect(pollManager.closePoll(0))
+      .to.be.revertedWithCustomError(pollManager, "ErrPollClosed")
+      .withArgs(0);
   });
 
   it("should be able to tell if an address has voted or not", async () => {
