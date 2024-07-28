@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+/// @title A contract to create and manage polls
+/// @author Shubham Prasad
 contract PollManager {
     struct Option {
         string name;
@@ -16,11 +18,14 @@ contract PollManager {
         uint numParticipants;
     }
 
+    /// @dev This maps pollId to poll
     mapping(uint256 => Poll) polls;
 
-    // pollId -> {address: voted? (yes / no)}
+    /// @dev pollId -> {address: voted? (yes / no)}
     mapping(uint256 => mapping(address => bool)) voteRecords;
 
+    /// @notice This is the total number of polls created
+    /// @dev This is used to get the next pollId
     uint public numPolls;
 
     // Errors
