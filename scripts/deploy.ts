@@ -1,35 +1,18 @@
 import hre from "hardhat";
 import PollManagerModule from "../ignition/modules/PollManager";
-import path from "path";
-import fs from "fs";
 
 async function main() {
+  console.log("⏳ Deploying PollManager contract...");
   const { pollManager } = await hre.ignition.deploy(PollManagerModule);
-  console.log(`PollManager address: ${await pollManager.getAddress()}`);
+  const pollManagerAddress = await pollManager.getAddress();
+  console.log(`✅ PollManager contract deployed at: ${pollManagerAddress}`);
 
-  // get path of frontend dir
-  const frontendDir = path.resolve(
-    __dirname,
-    "..",
-    "frontend",
-    "src",
-    "contracts"
-  );
-
-  // get artifact paths
-  const artifactPaths = await hre.artifacts.getArtifactPaths();
-
-  // copy artifacts to frontend dir
-  for (let artifactPath of artifactPaths) {
-    const artifactName = path.basename(artifactPath);
-    const dirname = path.basename(path.dirname(artifactPath));
-    const dirPath = path.join(frontendDir, dirname);
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath);
-    }
-    const src = artifactPath;
-    const dest = path.join(dirPath, artifactName);
-    fs.copyFileSync(src, dest);
+  if (hre.network.name === "sepolia") {
+    console.log("⏳ Verifying PollManager contract on Etherscan...");
+    await hre.run("verify:verify", {
+      address: pollManagerAddress,
+    });
+    console.log("✅ Contract verified on Etherscan.");
   }
 }
 

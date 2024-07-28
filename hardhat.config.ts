@@ -1,4 +1,4 @@
-import { HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig, vars } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
 const config: HardhatUserConfig = {
@@ -6,6 +6,15 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "frontend/src/contracts/types",
     target: "ethers-v6",
+  },
+  networks: {
+    sepolia: {
+      url: vars.get("SEPOLIA_RPC_URL"),
+      accounts: [vars.get("SEPOLIA_PRIVATE_KEY")],
+    },
+  },
+  etherscan: {
+    apiKey: vars.get("ETHERSCAN_API_KEY"),
   },
 };
 
