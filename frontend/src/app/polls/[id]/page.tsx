@@ -146,6 +146,7 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
   );
   const { contract } = useContract();
   const { hasVoted, setHasVoted } = useFetchHasVoted({ pollId: poll.id });
+  const { fetchPolls } = useFetchPolls();
 
   const votingDisabled = useMemo(
     () => hasVoted || !poll.isActive,
@@ -184,6 +185,7 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
     reset();
     setHasVoted(true);
     setSendingVoteTx(false);
+    await fetchPolls();
   };
 
   return (
