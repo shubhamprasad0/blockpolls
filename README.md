@@ -3,7 +3,7 @@
 BlockPolls is a decentralized application (dApp) that allows users to create and manage polls using blockchain technology. This project includes a smart contract for poll creation and management, deployed on the Sepolia testnet, and a frontend application built with React (Next.js) and deployed on Vercel.
 
 ## Demo
-[Screencast from 31-07-24 02:43:10 PM IST.webm](https://github.com/user-attachments/assets/34512ff0-66f4-4c35-b866-0f8e9f48f18f)
+https://github.com/user-attachments/assets/fe681462-cccd-4c70-9d83-63db0e27d322
 
 
 ## Features
