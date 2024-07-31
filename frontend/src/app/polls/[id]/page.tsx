@@ -7,6 +7,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Tooltip,
   TooltipProvider,
@@ -29,10 +30,13 @@ const PollHeader = ({
   sameUser: boolean;
 }) => {
   const { contract } = useContract();
+  const [closingPoll, setClosingPoll] = useState(false);
 
   const closePoll = async () => {
+    setClosingPoll(true);
     const tx = await contract.closePoll(poll.id);
     await tx.wait();
+    setClosingPoll(false);
   };
 
   return (
@@ -56,7 +60,11 @@ const PollHeader = ({
                     onClick={closePoll}
                     disabled={!poll.isActive}
                   >
-                    Close Poll
+                    {!closingPoll ? (
+                      "Close Poll"
+                    ) : (
+                      <Spinner size="small" className="mx-4" />
+                    )}
                   </Button>
                 </TooltipTrigger>
                 {!poll.isActive && (
@@ -108,6 +116,7 @@ const PollOption = ({
 };
 
 const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
+  const [sendingVoteTx, setSendingVoteTx] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
   const [selectedOption, setSelectedOption] = useState<PollOption | null>(null);
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<bigint>(
@@ -128,10 +137,12 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
   };
 
   const vote = async () => {
+    setSendingVoteTx(true);
     const tx = await contract.vote(poll.id, selectedOptionIndex);
     await tx.wait();
     reset();
     setHasVoted(true);
+    setSendingVoteTx(false);
   };
 
   return (
@@ -169,11 +180,17 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
       <CardFooter className="flex justify-end gap-4">
         {isVoting ? (
           <>
-            <Button variant="secondary" onClick={reset}>
-              Cancel
-            </Button>
+            {!sendingVoteTx && (
+              <Button variant="secondary" onClick={reset}>
+                Cancel
+              </Button>
+            )}
             <Button disabled={selectedOption === null} onClick={vote}>
-              Submit
+              {sendingVoteTx ? (
+                <Spinner size="small" className="mx-4" />
+              ) : (
+                "Submit"
+              )}
             </Button>
           </>
         ) : (
