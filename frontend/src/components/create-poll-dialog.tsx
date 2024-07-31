@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import useContractContext from "@/hooks/use-contract-context";
 import { PlusCircle } from "lucide-react";
 import React, { useState } from "react";
+import { Spinner } from "./ui/spinner";
 
 export function CreatePollDialog({
   fetchPolls,
@@ -23,6 +24,7 @@ export function CreatePollDialog({
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { contract } = useContractContext();
+  const [creatingPoll, setCreatingPoll] = useState(false);
 
   const addNewOptionField = () => {
     setOptions((options) => [...options, ""]);
@@ -34,11 +36,13 @@ export function CreatePollDialog({
   };
 
   const createPoll = async () => {
+    setCreatingPoll(true);
     const txResponse = await contract.createPoll(question, options);
     await txResponse.wait();
     reset();
     setDialogOpen(false);
     await fetchPolls();
+    setCreatingPoll(false);
   };
 
   return (
@@ -104,14 +108,18 @@ export function CreatePollDialog({
         <DialogFooter className="sticky">
           <div className="flex w-full justify-between">
             <div>
-              <Button variant="secondary" onClick={addNewOptionField}>
-                Add Option
-              </Button>
+              {!creatingPoll && (
+                <Button variant="secondary" onClick={addNewOptionField}>
+                  Add Option
+                </Button>
+              )}
             </div>
             <div className="flex gap-4">
-              <Button type="reset" variant="secondary" onClick={reset}>
-                Reset
-              </Button>
+              {!creatingPoll && (
+                <Button type="reset" variant="secondary" onClick={reset}>
+                  Reset
+                </Button>
+              )}
               <Button
                 type="submit"
                 onClick={createPoll}
@@ -120,7 +128,11 @@ export function CreatePollDialog({
                   options.some((option) => option === "")
                 }
               >
-                Create Poll
+                {!creatingPoll ? (
+                  "Submit"
+                ) : (
+                  <Spinner size="small" className="mx-4" />
+                )}
               </Button>
             </div>
           </div>
