@@ -33,6 +33,7 @@ const PollHeader = ({
   const { contract } = useContract();
   const [closingPoll, setClosingPoll] = useState(false);
   const { toast } = useToast();
+  const { fetchPolls } = useFetchPolls();
 
   const closePoll = async () => {
     setClosingPoll(true);
@@ -57,6 +58,7 @@ const PollHeader = ({
       });
     }
     setClosingPoll(false);
+    await fetchPolls();
   };
 
   return (
