@@ -14,6 +14,7 @@ import useContractContext from "@/hooks/use-contract-context";
 import { PlusCircle } from "lucide-react";
 import React, { useState } from "react";
 import { Spinner } from "./ui/spinner";
+import { useToast } from "./ui/use-toast";
 
 export function CreatePollDialog({
   fetchPolls,
@@ -23,8 +24,9 @@ export function CreatePollDialog({
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { contract } = useContractContext();
   const [creatingPoll, setCreatingPoll] = useState(false);
+  const { contract } = useContractContext();
+  const { toast } = useToast();
 
   const addNewOptionField = () => {
     setOptions((options) => [...options, ""]);
@@ -33,16 +35,36 @@ export function CreatePollDialog({
   const reset = () => {
     setQuestion("");
     setOptions(["", ""]);
+    setCreatingPoll(false);
   };
 
   const createPoll = async () => {
     setCreatingPoll(true);
-    const txResponse = await contract.createPoll(question, options);
-    await txResponse.wait();
+    try {
+      const txResponse = await contract.createPoll(question, options);
+      await txResponse.wait();
+    } catch (e: any) {
+      let description = "";
+      switch (e.code) {
+        case "ACTION_REJECTED":
+          description = "User rejected the transaction.";
+          break;
+
+        default:
+          description = "Transaction failed";
+          break;
+      }
+      toast({
+        title: `Failed to create poll -- ${e.code}`,
+        description: description,
+        variant: "destructive",
+      });
+      reset();
+    }
+
     reset();
     setDialogOpen(false);
     await fetchPolls();
-    setCreatingPoll(false);
   };
 
   return (

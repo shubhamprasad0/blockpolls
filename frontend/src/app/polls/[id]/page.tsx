@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useToast } from "@/components/ui/use-toast";
 import useContract from "@/hooks/use-contract";
 import useFetchHasVoted from "@/hooks/use-fetch-has-voted";
 import useFetchPolls from "@/hooks/use-fetch-polls";
@@ -31,11 +32,30 @@ const PollHeader = ({
 }) => {
   const { contract } = useContract();
   const [closingPoll, setClosingPoll] = useState(false);
+  const { toast } = useToast();
 
   const closePoll = async () => {
     setClosingPoll(true);
-    const tx = await contract.closePoll(poll.id);
-    await tx.wait();
+    try {
+      const tx = await contract.closePoll(poll.id);
+      await tx.wait();
+    } catch (e: any) {
+      let description = "";
+      switch (e.code) {
+        case "ACTION_REJECTED":
+          description = "User rejected the transaction.";
+          break;
+
+        default:
+          description = "Transaction failed";
+          break;
+      }
+      toast({
+        title: `Failed to close poll -- ${e.code}`,
+        description: description,
+        variant: "destructive",
+      });
+    }
     setClosingPoll(false);
   };
 
@@ -119,6 +139,8 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
   const [sendingVoteTx, setSendingVoteTx] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
   const [selectedOption, setSelectedOption] = useState<PollOption | null>(null);
+
+  const { toast } = useToast();
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<bigint>(
     BigInt(-1)
   );
@@ -138,8 +160,27 @@ const PollOptions = ({ poll }: { poll: PollData; sameUser: boolean }) => {
 
   const vote = async () => {
     setSendingVoteTx(true);
-    const tx = await contract.vote(poll.id, selectedOptionIndex);
-    await tx.wait();
+    try {
+      const tx = await contract.vote(poll.id, selectedOptionIndex);
+      await tx.wait();
+    } catch (e: any) {
+      let description = "";
+      switch (e.code) {
+        case "ACTION_REJECTED":
+          description = "User rejected the transaction.";
+          break;
+
+        default:
+          description = "Transaction failed";
+          break;
+      }
+      toast({
+        title: `Failed to vote -- ${e.code}`,
+        description: description,
+        variant: "destructive",
+      });
+      reset();
+    }
     reset();
     setHasVoted(true);
     setSendingVoteTx(false);
