@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import useWalletContext from "./use-wallet-context";
 import { BrowserProvider } from "ethers";
+import { useToast } from "@/components/ui/use-toast";
 
 const useWalletConnect = () => {
   const {
@@ -13,6 +14,8 @@ const useWalletConnect = () => {
   } = useWalletContext();
 
   const [signerAddress, setSignerAddress] = useState("");
+  const [connecting, setConnecting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkWalletStatus = async () => {
@@ -42,6 +45,7 @@ const useWalletConnect = () => {
 
   const connect = async () => {
     if (!isConnected) {
+      setConnecting(true);
       if (typeof window.ethereum !== "undefined") {
         const provider = new BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
@@ -51,12 +55,25 @@ const useWalletConnect = () => {
         setSignerAddress(address);
         setIsConnected(true);
       } else {
-        throw new Error("metamask not installed");
+        toast({
+          title: "Metamask not installed",
+          description: "Please install Metamask",
+          variant: "destructive",
+        });
       }
+      setConnecting(false);
     }
   };
 
-  return { connect, provider, signer, isConnected, signerAddress };
+  return {
+    connect,
+    connecting,
+    setConnecting,
+    provider,
+    signer,
+    isConnected,
+    signerAddress,
+  };
 };
 
 export default useWalletConnect;
